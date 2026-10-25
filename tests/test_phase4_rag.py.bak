@@ -1,0 +1,78 @@
+"""Test suite for Phase 4: KnowledgeBase, RAG Agent, and Comparative Evaluation."""
+import sys
+import json
+from pathlib import Path
+import pandas as pd
+import pytest
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.config import PRACTICE_DIR, REPORTS_DIR
+from src.knowledge_base import KnowledgeBase
+from src.rag_agent import RAGAgent
+from src.llm_agent import BasicLLMAgent
+from src.evaluation import run_questions_evaluation
+
+@pytest.fixture(scope="module")
+def shared_kb():
+    return KnowledgeBase()
+
+def test_kb_indexing_and_precedence(shared_kb):
+    """Verify that KB indexes both markdown files and products catalog."""
+    assert len(shared_kb.chunks) > 50, "KnowledgeBase should index sections and products"
+    # Verify superseded filtering
+    results = shared_kb.retrieve("return policy window")
+    assert all(c.status != "superseded" for c, _ in results)
+
+def test_kb_entity_retrieval(shared_kb):
+    """Verify that specific SKU mentions are retrieved alongside policy chunks."""
+    results = shared_kb.retrieve("SKU ELE-0012 warranty details")
+    section_ids = [c.section_id for c, _ in results]
+    assert any("products.csv:ELE-0012" in sid for sid in section_ids)
+
+def test_rag_agent_abstention(shared_kb):
+    """Verify that RAG agent abstains on out-of-scope / unanswerable questions."""
+    agent = RAGAgent(knowledge_base=shared_kb)
+    reply = agent.answer_question("Can I schedule a delivery at midnight with a drone?")
+    reply_lower = reply.lower()
+    assert any(m in reply_lower for m in ["don't have", "no information", "cannot", "sorry", "not covered"])
+
+def test_step2_rag_full_evaluation_and_comparison(shared_kb):
+    """Evaluate RAGAgent on all 52 practice questions and compare with Step 1."""
+    questions_df = pd.read_csv(PRACTICE_DIR / "questions.csv", dtype=str)
+    rag_agent = RAGAgent(knowledge_base=shared_kb)
+    
+    eval_df, step2_summary = run_questions_evaluation(rag_agent, questions_df, step_name="step2_rag")
+    
+    assert len(eval_df) == 52
+    assert step2_summary["total_questions"] == 52
+    
+    # Check that Step 2 beats Step 1 baseline
+    step1_summary_path = REPORTS_DIR / "step1_baseline_summary.json"
+    if step1_summary_path.exists():
+        with open(step1_summary_path, "r", encoding="utf-8") as f:
+            step1_summary = json.load(f)
+        
+        # Verify Step 2 improved overall accuracy
+        assert step2_summary["overall_accuracy_pct"] >= step1_summary["overall_accuracy_pct"]
+        
+        # Save comparative report
+        comparison = {
+            "metric": ["Total Questions", "Correct Answers", "Accuracy (%)", "Safe Claims (%)"],
+            "Step 1 Baseline (No RAG)": [
+                step1_summary["total_questions"],
+                step1_summary["correct_answers"],
+                step1_summary["overall_accuracy_pct"],
+                step1_summary["safe_claims_pct"],
+            ],
+            "Step 2 Grounded RAG": [
+                step2_summary["total_questions"],
+                step2_summary["correct_answers"],
+                step2_summary["overall_accuracy_pct"],
+                step2_summary["safe_claims_pct"],
+            ],
+        }
+        comp_df = pd.DataFrame(comparison)
+        comp_df.to_csv(REPORTS_DIR / "step1_vs_step2_comparison.csv", index=False)

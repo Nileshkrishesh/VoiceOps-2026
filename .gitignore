@@ -1,0 +1,28 @@
+# Python virtual environment and cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+venv/
+.venv/
+env/
+ENV/
+
+# Pytest & test cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs and runtime databases
+*.log
+tickets_created.csv
+
+# Output audio and artifacts generated during tests
+outputs/*.wav
+outputs/*.mp3
+outputs/*.json
+
+# Capstone dataset folder (per submission requirements: do not include dataset in submission zip)
+Capstone_Project_Dataset_FTTT_2026/
+dataset/

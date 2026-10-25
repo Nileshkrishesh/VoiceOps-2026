@@ -1,0 +1,8 @@
+{
+  "step": "step1_baseline",
+  "total_questions": 52,
+  "correct_answers": 12,
+  "overall_accuracy_pct": 23.08,
+  "must_include_accuracy_pct": 23.08,
+  "safe_claims_pct": 100.0
+}

@@ -1,0 +1,5 @@
+metric,Step 1 Baseline (No RAG),Step 2 Grounded RAG (Offline)
+Total Questions,52.0,52.0
+Correct Answers,12.0,4.0
+Accuracy (%),23.08,7.69
+Safe Claims (%),100.0,100.0

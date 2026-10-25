@@ -1,0 +1,2 @@
+"""VoiceOps 2026 - ZentroMart AI Customer Support Agent package."""
+__version__ = "1.0.0"

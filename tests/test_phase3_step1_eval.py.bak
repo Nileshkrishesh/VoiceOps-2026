@@ -1,0 +1,41 @@
+"""Test and benchmark runner for Phase 3: Step 1 Basic LLM Agent Evaluation."""
+import sys
+from pathlib import Path
+import pandas as pd
+import pytest
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.config import PRACTICE_DIR, REPORTS_DIR
+from src.llm_agent import BasicLLMAgent
+from src.evaluation import run_questions_evaluation
+
+def test_step1_baseline_evaluation_full():
+    """Run full baseline evaluation on all 52 practice questions and verify outputs."""
+    questions_file = PRACTICE_DIR / "questions.csv"
+    assert questions_file.exists(), f"Missing practice questions: {questions_file}"
+    
+    questions_df = pd.read_csv(questions_file, dtype=str)
+    assert len(questions_df) == 52, f"Expected 52 questions, found {len(questions_df)}"
+    
+    agent = BasicLLMAgent()
+    eval_df, summary = run_questions_evaluation(agent, questions_df, step_name="step1_baseline")
+    
+    # Assertions on evaluation results
+    assert len(eval_df) == 52
+    assert "is_correct" in eval_df.columns
+    assert "must_include_passed" in eval_df.columns
+    assert "generated_answer" in eval_df.columns
+    
+    # Verify report files were generated
+    report_csv = REPORTS_DIR / "step1_baseline_questions_evaluation.csv"
+    summary_json = REPORTS_DIR / "step1_baseline_summary.json"
+    assert report_csv.exists(), f"Evaluation CSV not written: {report_csv}"
+    assert summary_json.exists(), f"Summary JSON not written: {summary_json}"
+    
+    # Check that summary has required fields
+    assert summary["total_questions"] == 52
+    assert "overall_accuracy_pct" in summary
+    assert "must_include_accuracy_pct" in summary

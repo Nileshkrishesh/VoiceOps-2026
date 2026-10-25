@@ -1,0 +1,16 @@
+{
+  "input_file": "sample_call_turn2.wav",
+  "conversation_id": "sample_call",
+  "turn": 1,
+  "transcript": "",
+  "reply": "Audio received, but Gnani STT could not process it (GNANI_API_KEY is not configured in environment.). Please ensure GNANI_API_KEY is set.",
+  "spoken_reply": "Audio received, but Gnani STT could not process it (GNANI_API_KEY is not configured in environment.). Please ensure GNANI_API_KEY is set.",
+  "decision": "clarify",
+  "tool_calls": [],
+  "evidence": [],
+  "verified": false,
+  "output_audio": null,
+  "status": "success",
+  "stt_error": "GNANI_API_KEY is not configured in environment.",
+  "tts_error": null
+}
