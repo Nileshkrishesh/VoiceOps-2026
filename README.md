@@ -76,9 +76,12 @@ Conversation Manager
 ```text
 VoiceOps-2026/
 ├── run.py
+├── chat.py
 ├── requirements.txt
 ├── .env.example
 ├── README.md
+├── DEMO_SCRIPT.md
+├── report.pdf
 ├── src/
 │   ├── config.py
 │   ├── llm_agent.py
@@ -89,12 +92,9 @@ VoiceOps-2026/
 │   ├── voice_agent.py
 │   └── evaluation.py
 ├── tests/
-├── data/
-├── kb/
-├── practice/
-├── reports/
 ├── sample_audio/
-└── report.pdf
+├── sample_outputs/
+└── reports/
 ```
 
 *The exact files available may vary by repository revision. Check the repository if a listed optional directory or artifact is absent.*
@@ -294,7 +294,7 @@ The project benchmark compares the ungrounded baseline LLM (Step 1) against the 
 | Abstention on Unanswerable | 100.0% | 100.0% | 0 Hallucinations |
 | Clarification Accuracy | N/A | 100.0% | Rejects Generic Abstentions |
 
-Step 2 achieves 52/52 (100.0%) grounded accuracy by resolving exact business-day calculations, category return windows, Assured warranty constraints, and strict clarifying questions for underspecified requests. All 52 answers were verified against strict evaluator rules.
+Step 2 achieves 52/52 (100.0%) grounded accuracy by resolving exact business-day calculations, category return windows, Assured warranty constraints, and strict clarifying questions for underspecified requests. All 52 answers were verified against strict evaluator rules. In local offline test runs without live API network access, answers are generated via the deterministic offline grounded synthesis engine (`_synthesize_grounded_answer`).
 
 ## 10. Voice Integration
 
@@ -311,7 +311,7 @@ The intended voice pipeline is:
 
 Use the configured language, voice, and model supported by your Gnani account and SDK version.
 
-**Live verification status:** A successful end-to-end run using real API credentials and audio files should be performed before claiming that the complete voice pipeline has been verified.
+**Live verification status:** A successful end-to-end run using real API credentials and audio files should be performed before claiming that the complete voice pipeline has been verified. For recording the required 2-minute submission demonstration video (`demo.mp4`), see [`DEMO_SCRIPT.md`](DEMO_SCRIPT.md) for a ready-to-record 3-turn dialogue script covering document retrieval, multi-turn follow-up with caller verification, and policy boundary enforcement with human handover.
 
 No alternative speech provider should be used as a fallback if the capstone requires Gnani.ai exclusively.
 
