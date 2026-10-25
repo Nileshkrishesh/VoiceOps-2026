@@ -22,13 +22,19 @@ def test_step1_baseline_evaluation_full():
     
     
     agent = BasicLLMAgent()
+    agent.client.is_live = lambda: False
     agent.client.generate = lambda *args, **kwargs: (
-    "Hello! I am ZentroMart's AI customer support assistant. "
-    "I don't have enough verified information to answer this question. "
-    "Would you like me to connect you with our human support team?"
-)
+        "Hello! I am ZentroMart's AI customer support assistant. "
+        "I don't have enough verified information to answer this question. "
+        "Would you like me to connect you with our human support team?"
+    )
     
-    eval_df, summary = run_questions_evaluation(agent, questions_df, step_name="step1_baseline")
+    eval_df, summary = run_questions_evaluation(
+        agent,
+        questions_df,
+        step_name="step1_baseline",
+        pacing_delay=0,
+    )
     
     # Assertions on evaluation results
     assert len(eval_df) == 52
