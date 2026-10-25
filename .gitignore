@@ -33,3 +33,4 @@ dataset/
 reports/debug_*
 reports/*_backup*
 reports/backup_before_step2_final/
+*.zip

@@ -275,6 +275,7 @@ The test run took approximately 3 minutes and 32 seconds. Three deprecation warn
 | `test_phase1_dataset.py` | 5 |
 | `test_phase2_llm.py` | 4 |
 | `test_phase3_step1_eval.py` | 1 |
+| `test_phase4_rag.py` | 4 |
 | `test_phase5_conversation.py` | 4 |
 | `test_phase6_voice_and_runner.py` | 3 |
 | **Total** | **44** |
