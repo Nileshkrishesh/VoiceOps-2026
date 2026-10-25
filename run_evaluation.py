@@ -16,21 +16,21 @@ from src.llm_agent import BasicLLMAgent
 from src.rag_agent import RAGAgent
 from src.knowledge_base import KnowledgeBase
 from src.conversation import ConversationSession
-from src.evaluation import run_questions_evaluation, evaluate_answer
+from src.evaluation import run_questions_evaluation, evaluate_answer, safe_print
 
 def run_step1_evaluation():
     """Run Step 1: Baseline LLM without RAG."""
-    print("\n" + "="*70)
-    print("STEP 1: Baseline LLM Evaluation (No RAG)")
-    print("="*70)
+    safe_print("\n" + "="*70)
+    safe_print("STEP 1: Baseline LLM Evaluation (No RAG)")
+    safe_print("="*70)
     
     questions_csv = PRACTICE_DIR / "questions.csv"
     if not questions_csv.exists():
-        print(f"❌ ERROR: {questions_csv} not found")
+        safe_print(f"[ERROR] {questions_csv} not found")
         return None
     
     questions_df = pd.read_csv(questions_csv, dtype=str)
-    print(f"Loaded {len(questions_df)} questions from {questions_csv}")
+    safe_print(f"Loaded {len(questions_df)} questions from {questions_csv}")
     
     agent = BasicLLMAgent()
     results_df, summary = run_questions_evaluation(
@@ -39,60 +39,62 @@ def run_step1_evaluation():
         step_name="step1_baseline"
     )
     
-    print(f"\n✅ Step 1 Results:")
-    print(f"   Total Questions: {summary['total_questions']}")
-    print(f"   Correct Answers: {summary['correct_answers']}")
-    print(f"   Overall Accuracy: {summary['overall_accuracy_pct']}%")
-    print(f"   Safe Claims: {summary['safe_claims_pct']}%")
+    safe_print(f"\n[OK] Step 1 Results:")
+    safe_print(f"   Total Questions: {summary['total_questions']}")
+    safe_print(f"   Correct Answers: {summary['correct_answers']}")
+    safe_print(f"   Overall Accuracy: {summary['overall_accuracy_pct']}%")
+    safe_print(f"   Safe Claims: {summary['safe_claims_pct']}%")
     
     return summary
 
-def run_step2_evaluation():
-    """Run Step 2: RAG-grounded agent."""
-    print("\n" + "="*70)
-    print("STEP 2: RAG-Grounded Agent Evaluation")
-    print("="*70)
+def run_step2_evaluation(pacing_delay: float = 4.2, resume: bool = True):
+    """Run Step 2: RAG-grounded agent with rate-limit pacing and checkpoint resume."""
+    safe_print("\n" + "="*70)
+    safe_print("STEP 2: RAG-Grounded Agent Evaluation")
+    safe_print("="*70)
     
     questions_csv = PRACTICE_DIR / "questions.csv"
     if not questions_csv.exists():
-        print(f"❌ ERROR: {questions_csv} not found")
+        safe_print(f"[ERROR] {questions_csv} not found")
         return None
     
     questions_df = pd.read_csv(questions_csv, dtype=str)
-    print(f"Loaded {len(questions_df)} questions")
+    safe_print(f"Loaded {len(questions_df)} questions")
     
-    print("Initializing knowledge base...")
+    safe_print("Initializing knowledge base...")
     kb = KnowledgeBase()
-    print(f"   Indexed {len(kb.chunks)} chunks")
+    safe_print(f"   Indexed {len(kb.chunks)} chunks")
     
     agent = RAGAgent(knowledge_base=kb)
     results_df, summary = run_questions_evaluation(
         agent=agent,
         questions_df=questions_df,
-        step_name="step2_rag"
+        step_name="step2_rag",
+        pacing_delay=pacing_delay,
+        resume=resume,
     )
     
-    print(f"\n✅ Step 2 Results:")
-    print(f"   Total Questions: {summary['total_questions']}")
-    print(f"   Correct Answers: {summary['correct_answers']}")
-    print(f"   Overall Accuracy: {summary['overall_accuracy_pct']}%")
-    print(f"   Safe Claims: {summary['safe_claims_pct']}%")
+    safe_print(f"\n[OK] Step 2 Results:")
+    safe_print(f"   Total Questions: {summary['total_questions']}")
+    safe_print(f"   Correct Answers: {summary['correct_answers']}")
+    safe_print(f"   Overall Accuracy: {summary['overall_accuracy_pct']}%")
+    safe_print(f"   Safe Claims: {summary['safe_claims_pct']}%")
     
     return summary
 
 def run_conversation_evaluation():
     """Run Step 3: Multi-turn conversation evaluation."""
-    print("\n" + "="*70)
-    print("STEP 3: Conversation Evaluation")
-    print("="*70)
+    safe_print("\n" + "="*70)
+    safe_print("STEP 3: Conversation Evaluation")
+    safe_print("="*70)
     
     conversations_csv = PRACTICE_DIR / "conversations.csv"
     if not conversations_csv.exists():
-        print(f"❌ ERROR: {conversations_csv} not found")
+        safe_print(f"[ERROR] {conversations_csv} not found")
         return None
     
     conv_df = pd.read_csv(conversations_csv, dtype=str)
-    print(f"Loaded {len(conv_df)} turns across conversations")
+    safe_print(f"Loaded {len(conv_df)} turns across conversations")
     
     kb = KnowledgeBase()
     sessions = {}
@@ -141,8 +143,8 @@ def run_conversation_evaluation():
         }
         results.append(result_record)
         
-        status = "✅" if eval_result["is_correct"] and decision_match else "❌"
-        print(f"{status} {conv_id} T{turn}: {decision} | Correct: {eval_result['is_correct']}")
+        status = "[PASS]" if eval_result["is_correct"] and decision_match else "[FAIL]"
+        safe_print(f"{status} {conv_id} T{turn}: {decision} | Correct: {eval_result['is_correct']}")
     
     results_df = pd.DataFrame(results)
     
@@ -168,43 +170,43 @@ def run_conversation_evaluation():
     with open(summary_json, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
     
-    print(f"\n✅ Conversation Results:")
-    print(f"   Total Turns: {summary['total_turns']}")
-    print(f"   Correct Answers: {summary['correct_answers']}")
-    print(f"   Overall Accuracy: {summary['accuracy_pct']}%")
-    print(f"   Decision Accuracy: {summary['decision_accuracy_pct']}%")
+    safe_print(f"\n[OK] Conversation Results:")
+    safe_print(f"   Total Turns: {summary['total_turns']}")
+    safe_print(f"   Correct Answers: {summary['correct_answers']}")
+    safe_print(f"   Overall Accuracy: {summary['accuracy_pct']}%")
+    safe_print(f"   Decision Accuracy: {summary['decision_accuracy_pct']}%")
     
     return summary
 
 def main():
-    print("="*70)
-    print("VoiceOps 2026: Complete Evaluation Runner")
-    print("="*70)
+    safe_print("="*70)
+    safe_print("VoiceOps 2026: Complete Evaluation Runner")
+    safe_print("="*70)
     
     step1_summary = run_step1_evaluation()
     step2_summary = run_step2_evaluation()
     conv_summary = run_conversation_evaluation()
     
-    print("\n" + "="*70)
-    print("FINAL COMPARISON")
-    print("="*70)
+    safe_print("\n" + "="*70)
+    safe_print("FINAL COMPARISON")
+    safe_print("="*70)
     
     if step1_summary and step2_summary:
-        print(f"\nStep 1 (Baseline): {step1_summary['correct_answers']}/{step1_summary['total_questions']} = {step1_summary['overall_accuracy_pct']}%")
-        print(f"Step 2 (RAG):      {step2_summary['correct_answers']}/{step2_summary['total_questions']} = {step2_summary['overall_accuracy_pct']}%")
+        safe_print(f"\nStep 1 (Baseline): {step1_summary['correct_answers']}/{step1_summary['total_questions']} = {step1_summary['overall_accuracy_pct']}%")
+        safe_print(f"Step 2 (RAG):      {step2_summary['correct_answers']}/{step2_summary['total_questions']} = {step2_summary['overall_accuracy_pct']}%")
         
         improvement = step2_summary['overall_accuracy_pct'] - step1_summary['overall_accuracy_pct']
-        print(f"\n📊 RAG Improvement: +{improvement:.2f}% absolute")
+        safe_print(f"\n[INFO] RAG Improvement: +{improvement:.2f}% absolute")
         
         if step1_summary['correct_answers'] > 0:
             relative_gain = ((step2_summary['correct_answers'] - step1_summary['correct_answers']) / step1_summary['correct_answers']) * 100
-            print(f"   Relative Gain: +{relative_gain:.1f}%")
+            safe_print(f"   Relative Gain: +{relative_gain:.1f}%")
     
     if conv_summary:
-        print(f"\nConversation: {conv_summary['correct_answers']}/{conv_summary['total_turns']} = {conv_summary['accuracy_pct']}%")
+        safe_print(f"\nConversation: {conv_summary['correct_answers']}/{conv_summary['total_turns']} = {conv_summary['accuracy_pct']}%")
     
-    print("\n✅ All evaluations complete. Reports saved to:", REPORTS_DIR)
-    print("="*70)
+    safe_print("\n[OK] All evaluations complete. Reports saved to: " + str(REPORTS_DIR))
+    safe_print("="*70)
 
 if __name__ == "__main__":
     main()

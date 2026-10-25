@@ -1,0 +1,50 @@
+{
+  "timestamp": "2026-10-25T21:10:00Z",
+  "input_directory": "sample_audio",
+  "total_files": 2,
+  "wav_files_processed": 2,
+  "successful": 2,
+  "failed": 0,
+  "conversion_failures": [],
+  "total_duration_seconds": 1.84,
+  "results": [
+    {
+      "input_file": "PC002_turn1.wav",
+      "conversation_id": "PC002",
+      "turn": 1,
+      "transcript": "hello i want to check my order status my order id is six nine five two zero eight six seven please confirm the order id before proceeding",
+      "reply": "I can help with order 6952 0867. For your security, provide either the last 4 digits of your registered phone number or your 6-digit delivery pincode.",
+      "spoken_reply": "I can help with order 6952 0867. For your security, provide either the last 4 digits of your registered phone number or your 6-digit delivery pincode.",
+      "decision": "clarify",
+      "tool_calls": [
+        "lookup_order(69520867)"
+      ],
+      "evidence": [],
+      "verified": false,
+      "output_audio": "sample_outputs/PC002_turn1_reply.wav",
+      "status": "success",
+      "stt_error": null,
+      "tts_error": null
+    },
+    {
+      "input_file": "PC002_turn2.wav",
+      "conversation_id": "PC002",
+      "turn": 2,
+      "transcript": "yes that is my correct order id the last four digits of my register phone number is zero one zero one please check my order status",
+      "reply": "Your order 6952 0867 is currently 'shipped'. Its promised delivery date is 2026-10-23.",
+      "spoken_reply": "Your order 6952 0867 is currently 'shipped'. Its promised delivery date is 2026-10-23.",
+      "decision": "answer",
+      "tool_calls": [
+        "lookup_order(69520867, verification_value=REDACTED)"
+      ],
+      "evidence": [
+        "orders.csv:69520867"
+      ],
+      "verified": true,
+      "output_audio": "sample_outputs/PC002_turn2_reply.wav",
+      "status": "success",
+      "stt_error": null,
+      "tts_error": null
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "input_file": "PC002_turn2.wav",
+  "conversation_id": "PC002",
+  "turn": 2,
+  "transcript": "yes that is my correct order id the last four digits of my register phone number is zero one zero one please check my order status",
+  "reply": "Your order 6952 0867 is currently 'shipped'. Its promised delivery date is 2026-10-23.",
+  "spoken_reply": "Your order 6952 0867 is currently 'shipped'. Its promised delivery date is 2026-10-23.",
+  "decision": "answer",
+  "tool_calls": [
+    "lookup_order(69520867, verification_value=REDACTED)"
+  ],
+  "evidence": [
+    "orders.csv:69520867"
+  ],
+  "verified": true,
+  "output_audio": "sample_outputs/PC002_turn2_reply.wav",
+  "status": "success",
+  "stt_error": null,
+  "tts_error": null
+}

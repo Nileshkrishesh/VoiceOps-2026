@@ -20,6 +20,57 @@ from src.knowledge_base import KnowledgeBase
 from src.rag_agent import RAGAgent
 
 
+def extract_verification_proof(text: str) -> Optional[str]:
+    """Extract a 4-digit phone suffix or 6-digit pincode from digits or spoken words."""
+    if not text:
+        return None
+
+    # 1. Direct digits
+    direct = re.findall(r"(?<!\d)(\d{4}|\d{6})(?!\d)", text)
+    if direct:
+        for d in direct:
+            if len(d) == 6:
+                return d
+        return direct[0]
+
+    # 2. Spoken number sequences
+    digit_words = {
+        "zero": "0", "oh": "0", "o": "0", "shunya": "0", "sunya": "0",
+        "one": "1", "ek": "1",
+        "two": "2", "do": "2",
+        "three": "3", "teen": "3",
+        "four": "4", "chaar": "4", "char": "4",
+        "five": "5", "paanch": "5", "panch": "5",
+        "six": "6", "chhah": "6", "chhe": "6",
+        "seven": "7", "saat": "7",
+        "eight": "8", "aath": "8",
+        "nine": "9", "nau": "9",
+    }
+    
+    tokens = re.findall(r"[a-z0-9]+", text.lower())
+    found_sequences = []
+    current = ""
+    for tok in tokens:
+        if tok.isdigit():
+            current += tok
+        elif tok in digit_words:
+            current += digit_words[tok]
+        else:
+            if current:
+                found_sequences.append(current)
+                current = ""
+    if current:
+        found_sequences.append(current)
+
+    for seq in found_sequences:
+        if len(seq) == 6:
+            return seq
+        if len(seq) == 4:
+            return seq
+
+    return None
+
+
 def extract_spoken_sequence(text: str) -> Optional[str]:
     """Extract eight consecutive spoken/numeric digits from text."""
     digit_words = {
@@ -320,9 +371,8 @@ class ConversationSession:
             )
 
         # Accept a standalone 4-digit phone suffix or 6-digit
-        # pincode. Leading zeroes are preserved as strings.
-        digits = re.findall(r"(?<!\d)(\d{4}|\d{6})(?!\d)", msg)
-        proof = digits[0] if digits else None
+        # pincode from digits or spoken words. Leading zeroes are preserved as strings.
+        proof = extract_verification_proof(msg)
 
         if not proof:
             return self._finish(

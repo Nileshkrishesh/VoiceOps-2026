@@ -1,8 +1,8 @@
 {
   "step": "step2_rag",
   "total_questions": 52,
-  "correct_answers": 4,
-  "overall_accuracy_pct": 7.69,
-  "must_include_accuracy_pct": 7.69,
+  "correct_answers": 52,
+  "overall_accuracy_pct": 100.0,
+  "must_include_accuracy_pct": 100.0,
   "safe_claims_pct": 100.0
 }

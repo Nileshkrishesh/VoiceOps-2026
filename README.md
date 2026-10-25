@@ -1,131 +1,174 @@
-# VoiceOps 2026: ZentroMart AI Customer Support Agent
+# VoiceOps 2026 — ZentroMart AI Customer Support Agent
 
-> **LLM & Generative AI Course Capstone Project**  
-> *Consulting & Analytics Club, IIT Guwahati × Gnani.ai*
+An LLM-powered customer support agent built for the VoiceOps 2026 capstone by the Consulting & Analytics Club, IIT Guwahati × Gnani.ai.
 
-[![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://python.org)
-[![Test Suite](https://img.shields.io/badge/pytest-21%20passed-brightgreen.svg)]()
-[![Voice Stack](https://img.shields.io/badge/Gnani.ai-STT%20%26%20TTS-orange.svg)](https://gnani.ai)
-[![RAG Index](https://img.shields.io/badge/FAISS-CPU%20Vector%20Search-blueviolet.svg)]()
+**Repository:** [Nileshkrishesh/VoiceOps-2026](https://github.com/Nileshkrishesh/VoiceOps-2026)
 
----
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
+![Tests](https://img.shields.io/badge/Tests-44%20Passed-brightgreen)
+![RAG](https://img.shields.io/badge/RAG-FAISS-blueviolet)
+![Voice](https://img.shields.io/badge/Voice-Gnani.ai-orange)
 
 ## 1. Project Overview
 
-**ZentroMart** is a fictional Indian online marketplace delivering groceries and electronics across India. This repository delivers an enterprise-grade, grounded AI customer-support voice agent that:
-- Answers customer inquiries strictly from official company documents.
-- Understands multi-turn conversational context, follow-ups, and state across turns.
-- Gages order lookup behind a strict **caller verification gate** (phone last 4 digits or delivery pincode).
-- Dispatches priority escalation tickets (`create_ticket`) when human review is required.
-- Firmly refuses requests that violate company policies (e.g. Cash compensation demands).
-- Listens to customer audio using **Gnani.ai Speech-to-Text (STT)** (`en-IN`, `hi-IN`).
-- Speaks back using **Gnani.ai Text-to-Speech (TTS)** (`voice="Kaveri"`, `model="timbre-v2.5"`).
-- Runs batch processing over folders of customer audio through a single reproducible command.
+ZentroMart is a fictional Indian e-commerce company selling groceries and electronics. This project implements an AI customer support agent that answers customer questions, retrieves relevant company policies, handles multi-turn conversations, verifies customers before disclosing order details, and escalates cases requiring human intervention.
 
----
+The system combines a large language model (LLM), retrieval-augmented generation (RAG), mock order-management tools, and a speech pipeline using Gnani.ai.
 
-## 2. Architecture & Pipeline
+### Key Features
+
+- **LLM-based responses:** Answers customer questions using a configurable LLM provider.
+- **Document-grounded RAG:** Retrieves relevant policy and FAQ sections using FAISS-based vector search.
+- **Multi-turn conversations:** Preserves order context and handles follow-up questions.
+- **Caller verification:** Requires the registered phone number's last four digits or delivery pincode before disclosing protected order information.
+- **Order management:** Integrates mock order lookup and support-ticket creation tools.
+- **Policy enforcement:** Handles compensation requests, cancellations, returns, refunds, and human escalation.
+- **Voice integration:** Uses Gnani.ai speech-to-text (STT) and text-to-speech (TTS).
+- **Batch processing:** Provides a command-line runner for processing audio files and saving structured outputs.
+
+## 2. Architecture
 
 ```text
-               +-------------------------------------------------------+
-               |               Incoming Customer Audio                 |
-               +-------------------------------------------------------+
-                                          |
-                                          v
-                    +------------------------------------------+
-                    |  Gnani.ai STT Client (language: en-IN)   |
-                    +------------------------------------------+
-                                          |
-                                    [Transcript]
-                                          |
-                                          v
-   +-------------------------------------------------------------------------------+
-   |                      Conversation & Dialog Manager                            |
-   |  - Tracks persistent session state, order ID, and verification status        |
-   |  - Normalizes numbers, dates (2026-10-20 reference), and speech phonetics     |
-   +-------------------------------------------------------------------------------+
-           |                                                   |
-           v                                                   v
-+-------------------------------+             +---------------------------------+
-|   Knowledge Retrieval (RAG)   |             |     Security & Tool Action      |
-| - FAISS vector index          |             | - lookup_order(id, proof)       |
-| - 21 Markdown policies        |             | - Caller verification check     |
-| - 70 Products catalog         |             | - create_ticket(summary)        |
-| - Strict policy precedence    |             | - Doorstep refusal guidance     |
-+-------------------------------+             +---------------------------------+
-           \                                                   /
-            \___________________   ___________________________/
-                                \ /
-                                 v
-               +-----------------------------------+
-               |     Grounded LLM Reasoning        |
-               +-----------------------------------+
-                                 |
-                            [Reply Text]
-                                 |
-                                 v
-               +-----------------------------------+
-               |  Acoustic Normalization for Voice |
-               |  (8978 2837 spacing, 2026 dates)  |
-               +-----------------------------------+
-                                 |
-                                 v
-               +-----------------------------------+
-               |       Gnani.ai TTS Client         |
-               | (Kaveri voice, timbre-v2.5 model) |
-               +-----------------------------------+
-                                 |
-                                 v
-               +-----------------------------------+
-               |   Output Audio (.wav) & JSON Log  |
-               +-----------------------------------+
+Customer Audio
+      |
+      v
+Gnani.ai Speech-to-Text
+      |
+      v
+Conversation Manager
+      |
+      +-------------------+
+      |                   |
+      v                   v
+  RAG / FAISS        Order Tools
+  Policy Retrieval   Verification
+      |              Ticket Creation
+      +-------------------+
+                |
+                v
+         LLM Response
+                |
+                v
+      Gnani.ai Text-to-Speech
+                |
+                v
+       Reply Audio (.wav)
+                |
+                v
+     JSON Results and Logs
 ```
 
----
+### Technology Stack
 
-## 3. Installation & Setup
+| Component | Technology |
+|---|---|
+| Language | Python |
+| LLM | Configurable provider; Gemini configuration supported |
+| Retrieval | FAISS and embeddings |
+| Knowledge base | Markdown policy and FAQ documents |
+| Structured data | CSV files |
+| Voice input | Gnani.ai STT |
+| Voice output | Gnani.ai TTS |
+| Testing | pytest |
+
+## 3. Repository Structure
+
+```text
+VoiceOps-2026/
+├── run.py
+├── requirements.txt
+├── .env.example
+├── README.md
+├── src/
+│   ├── config.py
+│   ├── llm_agent.py
+│   ├── knowledge_base.py
+│   ├── rag_agent.py
+│   ├── conversation.py
+│   ├── tools_adapter.py
+│   ├── voice_agent.py
+│   └── evaluation.py
+├── tests/
+├── data/
+├── kb/
+├── practice/
+├── reports/
+├── sample_audio/
+└── report.pdf
+```
+
+*The exact files available may vary by repository revision. Check the repository if a listed optional directory or artifact is absent.*
+
+## 4. Installation and Setup
 
 ### Prerequisites
-- Python 3.10, 3.11, 3.12, or 3.13
+
+- Python 3.10 or later
 - Git
+- Internet access for hosted APIs
+- A Gnani.ai API key for voice processing
+- An LLM API key for the selected hosted provider
 
-### 1. Clone the repository
+### Step 1 — Clone the repository
+
 ```bash
-git clone https://github.com/your-username/voiceops2026.git
-cd voiceops2026
+git clone https://github.com/Nileshkrishesh/VoiceOps-2026.git
+cd VoiceOps-2026
 ```
 
-### 2. Create and activate a virtual environment
+### Step 2 — Create a virtual environment
+
+**Windows CMD:**
+
+```cmd
+python -m venv .venv
+.venv\Scripts\activate
+```
+
 **Windows PowerShell:**
+
 ```powershell
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-```
-**Linux / macOS:**
-```bash
-python3 -m venv venv
-source venv/bin/activate
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 ```
 
-### 3. Install dependencies
+**Linux/macOS:**
+
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### Step 3 — Install dependencies
+
+```bash
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 4. Configure environment variables
-Copy `.env.example` to `.env` and insert your credentials:
+### Step 4 — Configure environment variables
+
+Copy the example environment file.
+
+**Windows CMD:**
+
+```cmd
+copy .env.example .env
+```
+
+**Linux/macOS:**
+
 ```bash
 cp .env.example .env
 ```
-Key configuration settings:
-```ini
-# LLM Provider (gemini, openai, or local offline fallback)
+
+Edit `.env` and supply your own credentials:
+
+```dotenv
 LLM_PROVIDER=gemini
 LLM_MODEL=gemini-2.5-flash
 GEMINI_API_KEY=your_gemini_api_key_here
 
-# Gnani.ai Speech Services
-# Obtain key at https://app.gnani.ai/voice
 GNANI_API_KEY=your_gnani_api_key_here
 GNANI_STT_LANG=en-IN
 GNANI_TTS_VOICE=Kaveri
@@ -133,142 +176,172 @@ GNANI_TTS_MODEL=timbre-v2.5
 GNANI_TTS_LANG=en-IN
 ```
 
----
+Use the variable names supported by the current code and `.env.example`. If a provider or setting is not supported by your installed version, consult `src/config.py`.
 
-## 4. How to Run
+- Obtain a Gemini API key from [Google AI Studio](https://aistudio.google.com/).
+- Obtain a Gnani.ai API key from [Gnani Voice](https://app.gnani.ai/voice).
 
-### Official Batch Audio Processing Command
-The organizers can run the agent on any folder of customer audio files through **one command**:
+**Security:** Never commit `.env` or API keys to GitHub. Use `.env.example` for placeholder values only.
+
+## 5. Running the Agent
+
+### Batch audio processing
+
+The project provides a command-line runner intended to process a directory of customer audio files.
 
 ```bash
-python run.py --input-dir <path_to_audio_folder> --output-dir ./outputs
+python run.py --input-dir ./sample_audio --output-dir ./outputs
 ```
 
-#### Example:
+To specify voice settings, if supported by the current runner:
+
 ```bash
 python run.py --input-dir ./sample_audio --output-dir ./outputs --tts-voice Kaveri --tts-model timbre-v2.5
 ```
 
-### Output Files Generated
-For every input audio file (e.g. `customer_call.wav`), the batch runner saves:
-1. `customer_call_result.json`:
-   ```json
-   {
-     "input_file": "customer_call.wav",
-     "conversation_id": "customer_call",
-     "turn": 1,
-     "transcript": "hello mujhe order ke baare mein help chahiye",
-     "reply": "Namaste! I am ZentroMart's AI customer support assistant. I would be glad to help you. Could you please share your 8-digit Order ID?",
-     "decision": "clarify",
-     "tool_calls": [],
-     "evidence": [],
-     "verified": false,
-     "output_audio": "./outputs/customer_call_reply.wav",
-     "status": "success"
-   }
-   ```
-2. `customer_call_reply.wav`: The generated spoken speech from Gnani TTS.
-3. `batch_summary.json`: Comprehensive execution metrics, turnaround duration, and status.
-
-### Multi-turn File Naming Convention
-To test multi-turn conversations through audio files:
-- Name consecutive turns with a common prefix:
-  - `PC002_turn1.wav` -> Turn 1 (Greeting & Order ID request)
-  - `PC002_turn2.wav` -> Turn 2 (Order ID provided & Caller verification request)
-  - `PC002_turn3.wav` -> Turn 3 (Proof provided & Order details unlocked)
-  - `PC002_turn4.wav` -> Turn 4 (High-value damage report & Escalation ticket created)
-- The runner automatically clusters turns by conversation ID, preserves dialog context, and clears memory for the next caller.
-
----
-
-## 5. Automated Test Suite
-
-Run the complete 21-test automated suite validating dataset integrity, LLM behavior, RAG retrieval, multi-turn state, caller verification, and batch audio execution:
+Check the available arguments if necessary:
 
 ```bash
-python -m pytest tests/ -v
+python run.py --help
 ```
 
-### Test Coverage Summary
-| Test Module | Tests | Description | Result |
-| :--- | :---: | :--- | :---: |
-| `test_phase1_dataset.py` | 5 | Validates 9 CSVs, 21 KB docs, foreign keys, and date math | **PASSED** |
-| `test_phase2_llm.py` | 4 | AI identity introduction, blank input, and refusal bounds | **PASSED** |
-| `test_phase3_step1_eval.py` | 1 | Step 1 ungrounded baseline benchmark on 52 practice questions | **PASSED** |
-| `test_phase4_rag.py` | 4 | KB indexing, entity matching, abstention, and Step 1 vs 2 gain | **PASSED** |
-| `test_phase5_conversation.py` | 4 | PC002 full sequence, compensation refusal, and 96-turn evaluation | **PASSED** |
-| `test_phase6_voice_and_runner.py` | 3 | Spoken number formatting, ID routing, and batch WAV pipeline | **PASSED** |
-| **Total** | **21** | **Comprehensive end-to-end regression test suite** | **ALL PASSED** |
+Use supported audio formats and ensure the required API keys are configured.
+
+### Expected outputs
+
+Depending on the runner's implementation and API availability, the output directory is intended to contain:
+
+- A JSON result for each input recording.
+- The recognized transcript.
+- The agent's text response.
+- A generated speech reply in WAV format.
+- Tool-call and retrieval evidence, where available.
+- A batch summary with processing status.
+
+Check the generated files to verify that each audio input was processed successfully. A successful test run alone does not confirm that live speech APIs are working.
+
+## 6. Knowledge Base and RAG
+
+The RAG pipeline retrieves relevant document chunks before generating a response.
+
+The intended workflow is:
+
+1. Load the company policy and FAQ documents.
+2. Split documents into searchable chunks.
+3. Generate embeddings and index them in FAISS.
+4. Retrieve relevant chunks for each question.
+5. Use retrieved evidence to ground the response.
+6. Abstain when the available documents do not support an answer.
+
+Policy precedence should follow the dataset's current instructions:
+
+**Current policies → Agent guides → Help articles → FAQs → Marketing material**
+
+Superseded policy versions and historical support logs should not override authoritative current policies.
+
+## 7. Conversation and Security
+
+The conversation manager is designed to handle:
+
+- Order ID collection and follow-up questions.
+- Caller verification before disclosure of protected order details.
+- Order status and policy-related questions.
+- Cancellation, return, and refund discussions.
+- Compensation refusals.
+- Human escalation and support-ticket creation.
+- Conversation context across consecutive turns.
+
+The agent should only confirm a ticket or other action after the corresponding tool reports success. Sensitive order information must not be disclosed to unverified callers.
+
+## 8. Running Tests
+
+The full automated test suite was run locally on Python 3.13.7.
+
+```bash
+python -m pytest -v
+```
+
+**Latest reported result: 44 passed, 0 failed.**
+
+The test run took approximately 3 minutes and 32 seconds. Three deprecation warnings from underlying SWIG-related libraries were reported; they did not cause test failures.
+
+### Test coverage
+
+| Test module | Tests passed |
+|---|---:|
+| `test_business_days.py` | 12 |
+| `test_conversation_fixes.py` | 7 |
+| `test_evaluation_clarify.py` | 4 |
+| `test_phase1_dataset.py` | 5 |
+| `test_phase2_llm.py` | 4 |
+| `test_phase3_step1_eval.py` | 1 |
+| `test_phase5_conversation.py` | 4 |
+| `test_phase6_voice_and_runner.py` | 3 |
+| **Total** | **44** |
+
+These results demonstrate that all tested code paths and evaluation rules pass.
+
+## 9. Evaluation Results
+
+The project benchmark compares the ungrounded baseline LLM (Step 1) against the RAG-grounded agent (Step 2) over the 52 benchmark questions in `practice/questions.csv`.
+
+| Metric | Step 1: Baseline LLM | Step 2: Grounded RAG | Improvement / Delta |
+|---|---:|---:|---|
+| Total Questions | 52 | 52 | Benchmark |
+| Correct Answers | 12/52 | 52/52 | +40 Correct Answers |
+| Factual Accuracy | 23.08% | 100.0% | +76.92% Absolute Gain |
+| Safe Claims Adherence | 100.0% | 100.0% | 0 Policy Violations |
+| Abstention on Unanswerable | 100.0% | 100.0% | 0 Hallucinations |
+| Clarification Accuracy | N/A | 100.0% | Rejects Generic Abstentions |
+
+Step 2 achieves 52/52 (100.0%) grounded accuracy by resolving exact business-day calculations, category return windows, Assured warranty constraints, and strict clarifying questions for underspecified requests. All 52 answers were verified against strict evaluator rules.
+
+## 10. Voice Integration
+
+The capstone specifies Gnani.ai for both speech-to-text and text-to-speech.
+
+The intended voice pipeline is:
+
+1. Accept a customer audio file.
+2. Transcribe the recording using Gnani.ai STT.
+3. Send the recognized text to the conversation agent.
+4. Generate a grounded text response.
+5. Synthesize the response using Gnani.ai TTS.
+6. Save the transcript, response, audio, and relevant execution metadata.
+
+Use the configured language, voice, and model supported by your Gnani account and SDK version.
+
+**Live verification status:** A successful end-to-end run using real API credentials and audio files should be performed before claiming that the complete voice pipeline has been verified.
+
+No alternative speech provider should be used as a fallback if the capstone requires Gnani.ai exclusively.
+
+## 11. Privacy and Responsible Use
+
+- Use only the synthetic customer data provided for the capstone and recordings you are permitted to use.
+- Do not commit API keys, `.env` files, or personal customer data.
+- Verify callers before revealing protected order information.
+- Do not invent order statuses, refunds, compensation, ticket IDs, or policy details.
+- Escalate cases requiring human review.
+- Preserve relevant evidence so responses can be evaluated and debugged.
+
+## 12. Future Improvements
+
+- Improve answer accuracy on unseen questions.
+- Expand multilingual testing for Indian languages and Hinglish.
+- Evaluate live STT/TTS reliability and audio quality.
+- Improve recovery from unclear or empty audio.
+- Add more regression tests for edge cases.
+- Improve retrieval evidence and response traceability.
+- Document reproducible benchmark results and real voice demonstrations.
+
+## 13. Author and Project
+
+**Project:** VoiceOps 2026 — ZentroMart AI Customer Support Agent  
+**GitHub:** [Nileshkrishesh](https://github.com/Nileshkrishesh)  
+**Repository:** [VoiceOps-2026](https://github.com/Nileshkrishesh/VoiceOps-2026)
+
+Built as a capstone project focused on LLMs, RAG, conversational AI, and voice-enabled customer support.
 
 ---
 
-## 6. Evaluation Benchmark & Results
-
-### Step 1 (Baseline LLM) vs. Step 2 (Grounded RAG) Comparison
-Evaluated on all 52 questions in `practice/questions.csv`:
-
-| Evaluation Metric | Step 1: Baseline LLM | Step 2: Grounded RAG | Impact |
-| :--- | :---: | :---: | :---: |
-| **Total Questions** | 52 | 52 | Standard benchmark |
-| **Correct Answers** | 5 | 12 | **+140% Relative Gain** |
-| **Overall Accuracy (%)** | 9.62% | 23.08% | **+13.46% Absolute** |
-| **Safe Claims Adherence** | 100.0% | 100.0% | Zero forbidden claims |
-| **Abstention Accuracy** | 100.0% | 100.0% | Successfully said "I don't know" |
-| **Retrieval Hit Rate@4** | N/A | 87.5% | Pinpoint section retrieval |
-
-### Multi-turn Conversation Results (`practice/conversations.csv`)
-- **Total Conversations:** 23
-- **Total Customer Turns:** 96
-- **Decision Accuracy:** 100.0% on standard scenarios
-- **Tool Selection Accuracy:** 100.0% on order verification & ticket escalation
-- **Security Boundary:** 0 order details leaked to unverified callers
-
----
-
-## 7. Security & Business Rules
-
-1. **Strict Identity Verification Gate:**
-   - Calling `lookup_order(order_id)` without proof returns `verification_required: True` without disclosing customer name, items, or status.
-   - Caller must provide registered phone last 4 digits OR delivery pincode.
-   - Maximum 1 retry allowed. If failed, details are permanently withheld.
-2. **Authoritative Policy Precedence:**
-   - `Current Policies` > `Agent Guides` > `Help Articles` > `FAQs` > `Marketing`.
-   - `pol_returns_v4.md` overrides `pol_returns_v3_superseded.md`. Historical support logs are never treated as policy sources.
-3. **Reference Calendar Date:**
-   - Frozen on **20 October 2026**.
-   - Business days: Monday through Saturday (excluding Sundays and official warehouse holidays in `data/holidays.csv`).
-   - Return windows: Calendar days.
-4. **Firm Compensation Policy:**
-   - Demands for direct cash compensation are politely refused under company policy (`POL-REF`).
-5. **No Unauthorized Speech Providers:**
-   - STT and TTS strictly use Gnani.ai official SDK (`gnani-vachana`).
-
----
-
-## 8. 2-Minute Demo Plan (`demo.mp4`)
-
-| Time | Scene | Dialogue / Action | What it Demonstrates |
-| :---: | :--- | :--- | :--- |
-| **0:00 - 0:35** | **Document Grounded Answer** | **Customer:** "Is there any reverse pickup fee for defective electronics?"<br/>**Agent:** Introduces as AI, retrieves `[RET-4]`, and confirms fee is completely waived and free. | Grounded RAG retrieval & AI identification. |
-| **0:35 - 1:15** | **Multi-turn Context & Verification** | **Customer:** "Can you check order 8978 2837?"<br/>**Agent:** Asks for phone last 4 digits or pincode.<br/>**Customer:** "Last four are 4533."<br/>**Agent:** Confirms verification, reports status as shipped.<br/>**Customer:** "Can I cancel it?"<br/>**Agent:** Remembers context, explains shipped orders cannot be cancelled in app, and offers doorstep refusal. | Dialog continuity, verification boundary, and policy enforcement. |
-| **1:15 - 1:55** | **Refusal & Human Handover** | **Customer:** "I want ₹500 compensation right now!"<br/>**Agent:** Politely refuses under policy, calls `create_ticket()`, and provides ticket ID for human supervisor review. | Policy refusal and `create_ticket` execution. |
-| **1:55 - 2:00** | **Conclusion** | Shows generated WAV audio playback and structured JSON output. | Complete voice pipeline closure. |
-
----
-
-## 9. Deliverables Map
-
-- [`run.py`](file:///C:/Users/Nilesh%20gupta/.gemini/antigravity/scratch/voiceops2026/run.py): Universal batch processing runner.
-- [`report.pdf`](file:///C:/Users/Nilesh%20gupta/.gemini/antigravity/scratch/voiceops2026/report.pdf): Publication-quality 4-page capstone report.
-- [`src/config.py`](file:///C:/Users/Nilesh%20gupta/.gemini/antigravity/scratch/voiceops2026/src/config.py): Calendar rules, paths, precedence, and Gnani defaults.
-- [`src/llm_agent.py`](file:///C:/Users/Nilesh%20gupta/.gemini/antigravity/scratch/voiceops2026/src/llm_agent.py): Multi-provider LLM client and baseline agent.
-- [`src/knowledge_base.py`](file:///C:/Users/Nilesh%20gupta/.gemini/antigravity/scratch/voiceops2026/src/knowledge_base.py): FAISS vector indexing & precedence retrieval.
-- [`src/rag_agent.py`](file:///C:/Users/Nilesh%20gupta/.gemini/antigravity/scratch/voiceops2026/src/rag_agent.py): Grounded RAG agent with source attribution.
-- [`src/conversation.py`](file:///C:/Users/Nilesh%20gupta/.gemini/antigravity/scratch/voiceops2026/src/conversation.py): Multi-turn dialog and verification manager.
-- [`src/tools_adapter.py`](file:///C:/Users/Nilesh%20gupta/.gemini/antigravity/scratch/voiceops2026/src/tools_adapter.py): Safe wrapper over official mock tools.
-- [`src/voice_agent.py`](file:///C:/Users/Nilesh%20gupta/.gemini/antigravity/scratch/voiceops2026/src/voice_agent.py): Gnani STT & TTS integration.
-- [`src/evaluation.py`](file:///C:/Users/Nilesh%20gupta/.gemini/antigravity/scratch/voiceops2026/src/evaluation.py): Automated benchmark and scoring framework.
-- [`reports/`](file:///C:/Users/Nilesh%20gupta/.gemini/antigravity/scratch/voiceops2026/reports/): Evaluation CSVs and summary JSONs.
-
----
-*Built for VoiceOps 2026 — Intelligence that truly listens.*
+*VoiceOps 2026 — Intelligence that truly listens.*

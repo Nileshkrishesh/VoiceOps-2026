@@ -1,0 +1,18 @@
+{
+  "input_file": "PC002_turn1.wav",
+  "conversation_id": "PC002",
+  "turn": 1,
+  "transcript": "hello i want to check my order status my order id is six nine five two zero eight six seven please confirm the order id before proceeding",
+  "reply": "I can help with order 6952 0867. For your security, provide either the last 4 digits of your registered phone number or your 6-digit delivery pincode.",
+  "spoken_reply": "I can help with order 6952 0867. For your security, provide either the last 4 digits of your registered phone number or your 6-digit delivery pincode.",
+  "decision": "clarify",
+  "tool_calls": [
+    "lookup_order(69520867)"
+  ],
+  "evidence": [],
+  "verified": false,
+  "output_audio": "sample_outputs/PC002_turn1_reply.wav",
+  "status": "success",
+  "stt_error": null,
+  "tts_error": null
+}

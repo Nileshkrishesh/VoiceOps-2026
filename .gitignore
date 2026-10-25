@@ -26,3 +26,10 @@ outputs/*.json
 # Capstone dataset folder (per submission requirements: do not include dataset in submission zip)
 Capstone_Project_Dataset_FTTT_2026/
 dataset/
+
+# Local cache directories
+.keras/
+.matplotlib/
+reports/debug_*
+reports/*_backup*
+reports/backup_before_step2_final/

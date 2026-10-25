@@ -8,12 +8,20 @@ from dotenv import load_dotenv
 # Load environment variables from .env if present
 load_dotenv()
 
+# Ensure HuggingFace models load from local cache without network timeouts
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
+os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+
 # Base project directories
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SRC_DIR = PROJECT_ROOT / "src"
 TESTS_DIR = PROJECT_ROOT / "tests"
 OUTPUTS_DIR = PROJECT_ROOT / "outputs"
 REPORTS_DIR = PROJECT_ROOT / "reports"
+
+# Ensure local writable caches inside project root
+os.environ.setdefault("KERAS_HOME", str(PROJECT_ROOT / ".keras"))
+os.environ.setdefault("MPLCONFIGDIR", str(PROJECT_ROOT / ".matplotlib"))
 
 # Dataset root resolution: check env var, then local dataset folder, then Capstone folder
 def _resolve_dataset_dir() -> Path:
@@ -69,7 +77,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
 # Embedding and Vector DB Configuration
 EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "all-MiniLM-L6-v2")
-RETRIEVAL_TOP_K = int(os.getenv("RETRIEVAL_TOP_K", "4"))
+RETRIEVAL_TOP_K = int(os.getenv("RETRIEVAL_TOP_K", "6"))
 SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.25"))
 
 # Gnani.ai Configuration
